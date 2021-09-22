@@ -2,6 +2,7 @@
 #include <fstream>
 using namespace std;
 
+//vector is easy to be made function
 vector <char> vec;
 
 //Build a struct dedicated to logging user input
