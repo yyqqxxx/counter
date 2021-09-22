@@ -17,3 +17,41 @@ BRACKETS = [
     '(', ')', '{', '}', '<', '>', ',', ':', ';', '-', '+', '*', '/', '=', '^',
     '&', '|', '!', '%'
 ]
+# 手动封装一个栈，让操作更加方便
+class Stack():
+    def __init__(self) -> None:
+        self.__buffer = []
+
+    def pop(self) -> Any:
+        self.__buffer.pop()
+
+    def push(self, elemt) -> Any:
+        self.__buffer.append(elemt)
+
+    def __len__(self):
+        return len(self.__buffer)
+
+    def top(self) -> Any:
+        return self.__buffer[len(self.__buffer) - 1]
+
+
+def readFile(filePath: str) -> list[str]:  # 读取文件内容
+    lines = ""
+    with open(filePath, 'r', encoding='utf-8', errors='ignore') as file:  # 逐行读取
+        for line in file:
+            lines = lines + line
+    lines = re.sub(r'\".*\"', '', lines)  # 正则匹配，将所有字符串删除
+    lines = re.sub(r"//.*", '', lines)  # 正则匹配，将所有以 // 注释的内容删除
+    lines = lines.replace('\n', '')  # 删除所有换行符
+    lines = lines.replace('\t', '')
+    lines = re.sub(r'/\*.*?\*/', '',
+                   lines)  # 正则删除所有以 /**/注释的内容删除，采用非贪婪匹配，防止删除过多
+    for i in BRACKETS:
+        lines = lines.replace(i, ' ' + i + ' ')  # 将所有非字母或数字的字符前后各插入一个空格，方便操作
+    lines = lines.split(' ')  # 以空格为界切割所有单词
+    while True:  # 删除所有的空字符
+        try:
+            lines.remove('')
+        except Exception:
+            break
+    return lines
