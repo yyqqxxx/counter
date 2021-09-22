@@ -6,7 +6,6 @@
 #include <vector>
 #include <stack>
 
-//因为是小程序，为了代码编写的简便就直接引用 std
 using namespace std;
 
 const string keywords[] = { "auto","break","case","char","const","continue","default"
