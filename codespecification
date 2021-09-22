@@ -1,30 +1,38 @@
-Code specification
-The indentation
-Indent 4 Spaces at a time, using the space or TAB key
+C++ 允许在函数的任何位置声明变量. 我们提倡在尽可能小的作用域中声明变量, 离第一次使用越近越好. 这使得代码浏览者更容易定位变量声明的位置, 了解变量的类型和初始值. 特别是，应使用初始化的方式替代声明再赋值, 比如:
 
-Variable naming
-To be representative, use clear abbreviations, lower case initials, and camel case nomenclature
-Function, the arguments inside the function are named as above
-Capitalize the first letter of the class, make sense of the name, capitalize the first letter of the class, lowercase letters between words
-All letters of constant words should be capitalized, and words and numbers should be connected by underscores
-Maximum number of characters per line
-Each line contains no more than 79 characters, allowing a few more comments
+int i;
+i = f(); // 坏——初始化和声明分离
+int j = g(); // 好——初始化时声明
+vector<int> v;
+v.push_back(1); // 用花括号初始化更好
+v.push_back(2);
+vector<int> v = {1, 2}; // 好——v 一开始就初始化
+属于 if, while 和 for 语句的变量应当在这些语句中正常地声明，这样子这些变量的作用域就被限制在这些语句中了，举例而言:
 
-Maximum number of lines of a function
-There should be no more than 50 lines in the function, and the excess should be split logically
+while (const char* p = strchr(str, '/')) str = p + 1;
+有一个例外, 如果变量是一个对象, 每次进入作用域都要调用其构造函数, 每次退出作用域都要调用其析构函数. 这会导致效率降低.
 
-Empty line rules
-For functions outside the class, two empty lines should be added before and after the declaration of a class, and one blank line should be added above the declaration of an in-class function. Constant definitions and package introductions can be done without empty lines
+// 低效的实现
+for (int i = 0; i < 1000000; ++i) {
+    Foo f;                  // 构造函数和析构函数分别调用 1000000 次!
+    f.DoSomething(i);
+}
+在循环作用域外面声明这类变量要高效的多:
 
-Annotation rules
-Class definitions, function declarations, global variables, and some key variables should be annotated, with comments on their functionality and usage. Single-line comments # can be above the same line or comment, and multi-line comments are above the line.
+Foo f;                      // 构造函数和析构函数只调用 1 次
+for (int i = 0; i < 1000000; ++i) {
+    f.DoSomething(i);
+}
+2.5. 静态和全局变量
+Tip
 
-Operator before and after Spaces
-Operators should be preceded by a space, except as explained later
+禁止定义静态储存周期非POD变量，禁止使用含有副作用的函数初始化POD全局变量，因为多编译单元中的静态变量执行时的构造和析构顺序是未明确的，这将导致代码的不可移植。
 
-Other rules
-Do not use Spaces before and after parentheses and square brackets
-A comma is not preceded by a space, but should be followed by a space
-Functions should be declared with their return values, and arguments within functions should be declared with their types
-A '#' comment should be two Spaces away from the character before it and one space away from the character after it
-':' is preceded by no space and followed by one space
+禁止使用类的 静态储存周期 变量：由于构造和析构函数调用顺序的不确定性，它们会导致难以发现的 bug 。不过 constexpr 变量除外，毕竟它们又不涉及动态初始化或析构。
+
+静态生存周期的对象，即包括了全局变量，静态变量，静态类成员变量和函数静态变量，都必须是原生数据类型 (POD : Plain Old Data): 即 int, char 和 float, 以及 POD 类型的指针、数组和结构体。
+
+静态变量的构造函数、析构函数和初始化的顺序在 C++ 中是只有部分明确的，甚至随着构建变化而变化，导致难以发现的 bug. 所以除了禁用类类型的全局变量，我们也不允许用函数返回值来初始化 POD 变量，除非该函数（比如 getenv() 或 getpid() ）不涉及任何全局变量。函数作用域里的静态变量除外，毕竟它的初始化顺序是有明确定义的，而且只会在指令执行到它的声明那里才会发生。
+
+Note
+
