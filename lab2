@@ -46,6 +46,7 @@ int main() {
   infile.open(UserInput.FileName);
   myfile.open(UserInput.FileName); 
   int i;
+  
   //LEVEL 1
   if (!infile.is_open()) {
         exit(EXIT_FAILURE);
